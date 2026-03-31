@@ -392,7 +392,7 @@ Apps made from commercial app generators must be submitted by the provider of th
 4. Published contact information
 
 **What immediately disqualifies an app:**
-- Random/anonymous chat (Chatroulette-style) → not allowed on App Store
+- Random/anonymous chat (Chatroulette-style) → explicitly subject to §1.2 UGC requirements (clarified in **February 6, 2026** guideline update); apps with random or anonymous chat must implement all four UGC components or face rejection
 - App primarily used for pornographic content
 - "Hot-or-not" voting on real people
 - Bullying or physical threats facilitated by the app
@@ -609,7 +609,7 @@ Apple updated its age-rating system and requires developers to answer new age-ra
 #### Practical implication for AI + UGC apps
 - If the app can generate or expose mature text/images/video, the age-rating workflow is no longer just metadata
 - The product needs a real enforcement mechanism, not only a declared App Store age rating
-- Apple's Declared Age Range API is an emerging tool to support this on newer OS versions, but the policy obligation exists regardless
+- Apple's **Declared Age Range API** is now available in **beta** (as of February 24, 2026) for testing age assurance in **Brazil, Australia, Singapore, Utah, and Louisiana**. Use it to meet upcoming age-verification obligations in these jurisdictions. The policy obligation to restrict underage access exists regardless of API availability.
 
 ---
 

@@ -40,6 +40,24 @@ This is the most significant recent enforcement action related to AI code genera
 
 ---
 
+## ADPLA Updated (March 30, 2026)
+
+**Source:** https://developer.apple.com/news/?id=03302026a
+
+The Apple Developer Program License Agreement was revised on **March 30, 2026** with new framework-specific requirements:
+
+- **Foveated Streaming framework** — New specified requirements and data privacy clarifications
+- **Family Controls framework** — New specified requirements
+- **Accessory Notifications framework** — New specified requirements
+- **Accessory Live Activities framework** — New specified requirements
+
+**What this means for developers:**
+- If your app uses any of these frameworks, review the updated ADPLA terms before your next submission.
+- All current Apple Developer Program members should accept the updated agreement in their developer account.
+- Apps using Family Controls (Screen Time API) or accessory-related frameworks should verify compliance with the new terms.
+
+---
+
 ## Age Rating System Overhaul (July 2025 — Deadline January 31, 2026)
 
 **Source:** https://developer.apple.com/news/upcoming-requirements/?id=07242025a  
@@ -83,6 +101,24 @@ Different regions now have distinct rating thresholds:
 > *"Use of terms like 'For Kids' and 'For Children' in app metadata is reserved for the Kids Category."*
 
 Using "For Kids" or "For Children" in your app name, subtitle, description, or keywords while NOT being in the Kids Category = metadata rejection. This also applies to screenshots containing child-oriented messaging.
+
+---
+
+## Xcode 26 / iOS 26 SDK Minimum Requirement (Deadline: April 28, 2026)
+
+**Source:** https://developer.apple.com/news/upcoming-requirements/
+
+Starting **April 28, 2026**, all apps uploaded to App Store Connect must be built with **Xcode 26 or later** using an SDK for:
+
+- iOS 26
+- iPadOS 26
+- tvOS 26
+- visionOS 26
+- watchOS 26
+
+Builds compiled with older Xcode versions or SDKs will be **rejected at upload time**. This is a hard submission blocker — plan migration before the deadline.
+
+**Previous requirement (still in effect until April 28):** Xcode 16 / iOS 18 SDK (effective since April 24, 2025).
 
 ---
 
@@ -382,18 +418,23 @@ Apple proactively removes apps that meet ALL of these criteria:
 
 ## Regulated Medical Device Apps (2027 Deadline)
 
-**Source:** https://www.world-today-news.com/app-store-requirements-for-regulated-medical-device-apps-in-eea-uk-and-us/
+**Source:** https://www.world-today-news.com/app-store-requirements-for-regulated-medical-device-apps-in-eea-uk-and-us/  
+**Update (March 26, 2026):** https://developer.apple.com/news/?id=03262026a
 
 Apps in the **Health & Fitness** or **Medical** categories targeting EEA, UK, and US markets will be required to declare **"Regulated Medical Device"** status in App Store Connect metadata.
 
-- Deadline: early 2027
-- Non-compliant apps will face update rejection
+**Current status (as of March 26, 2026):**
+- The App Store **now displays** regulated medical device status on product pages in EEA, UK, and US
+- **New apps**: Must provide regulated device status **immediately** to distribute in these regions
+- **Existing apps**: Must provide status by **early 2027**; after that deadline, app updates cannot be submitted without the declaration
+- Apps with frequent references to Medical/Treatment Information must also declare status
+- Developers can select **"No"** if the app is not a regulated medical device
 - CI/CD pipelines that auto-submit may break if the metadata declaration isn't added
 
 ### What this means for health apps
 
 If your app makes medical claims, measures health metrics, or claims to diagnose conditions:
-- Start declaring medical device status now
+- Declare medical device status in App Store Connect **now** (don't wait for the 2027 deadline)
 - Ensure regulatory clearance documentation is ready
 - Include FDA/CE clearance information in Notes for Review
 
@@ -563,9 +604,12 @@ VStack {
 ## Commission Rate Changes (2026)
 
 ### China (effective March 15, 2026)
+
+**Source:** https://developer.apple.com/news/?id=03122026a
+
 - Standard IAP commission: **25%** (down from 30%)
-- Small Business Program rate: **15%** (was 15%, unchanged)
-- Auto-renewal rate after year 1: **20%** (down from 25%)
+- Small Business Program & Mini Apps Partner Program (first year): **12%** (down from 15%)
+- Auto-renewal rate after year 1: **12%** (down from 15%)
 
 ### Global rates (unchanged)
 - Standard: 30% (27% EU with Core Technology Fee alternative)
