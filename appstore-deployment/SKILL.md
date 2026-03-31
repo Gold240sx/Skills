@@ -115,6 +115,11 @@ Apple reviewed **7,771,599** submissions and rejected **~1,931,400** in 2024. A 
 
 These prevent even entering review. Fix before submitting.
 
+**Minimum SDK requirement (deadline: April 28, 2026)**
+- Apps uploaded to App Store Connect must be built with **Xcode 26 or later** using the **iOS 26 / iPadOS 26 / tvOS 26 / visionOS 26 / watchOS 26** SDK.
+- Builds using older SDKs will be rejected at upload time.
+- Reference: [Submitting apps](https://developer.apple.com/app-store/submitting/)
+
 **Code signing & entitlements**
 - Entitlements in the binary must match provisioning profile and App ID capabilities exactly.
 - Common errors: `ITMS-90161` (invalid provisioning profile), `ITMS-9000` (invalid binary), entitlements mismatch.
