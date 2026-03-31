@@ -14,7 +14,7 @@ Copy and use these checklists before every submission.
 - [ ] **Required reason APIs** — If app or embedded targets use covered APIs (disk space, file timestamps, UserDefaults, boot time, active keyboard, etc.), `PrivacyInfo.xcprivacy` on **that target** includes `NSPrivacyAccessedAPITypes` with [approved reasons](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api)
 - [ ] **App Store Connect → Validate App** (or upload dry-run) — no privacy-manifest or signature errors reported
 - [ ] **EU DSA** — Trader status and verified contact flow completed if distributing in the EU as a trader; hobbyist/non-trader path declared if applicable ([ASC Help](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/))
-- [ ] Export compliance set in Info.plist (`ITSAppUsesNonExemptEncryption`)
+- [ ] Export compliance set in Info.plist (`ITSAppUsesNonExemptEncryption`) and ASC encryption questions completed; if app uses non-exempt crypto, legal/export classification path reviewed (EAR/BIS/CCATS as applicable)
 - [ ] App not using `UIWebView` (deprecated; use `WKWebView`)
 - [ ] No private Settings URL schemes (`prefs:root`, `App-Prefs`, etc.) — use `UIApplication.openSettingsURLString` for your app's settings
 - [ ] Quick scan: `strings YourApp | grep -E 'prefs:root|App-Prefs'` returns nothing suspicious
@@ -47,7 +47,10 @@ Copy and use these checklists before every submission.
 - [ ] App Privacy nutrition label completed and matches actual data flows
 - [ ] Every permission request has a clear, user-benefit purpose string in Info.plist
 - [ ] No permission required to access core functionality (permission denied = degraded feature, not blocked app)
-- [ ] ATT prompt implemented if app does any cross-app or cross-site tracking
+- [ ] ATT prompt implemented if app does any cross-app or cross-site tracking; IDFA used only for advertising per ADPLA; Tracking Preference honored; no linking IDs after user resets advertising identifier
+- [ ] Location used only where **directly relevant** to features (**§5.1.5**); purpose strings match behavior; no overriding Apple location consent UI; “Always” has clear user benefit
+- [ ] Promotional push / APN: opt-in + opt-out in app if promotional (except Pass-tied rules); no spam/phishing pattern
+- [ ] Network Extension / Wi‑Fi entitlements: used for networking only, not ads or location fingerprinting
 - [ ] Third-party AI providers disclosed in privacy policy and App Privacy label
 - [ ] Account deletion: in-app initiated, deletes account + data, easy to find
 - [ ] No mandatory login for features that don't require identity
@@ -74,6 +77,9 @@ Copy and use these checklists before every submission.
 - [ ] "What's New" is specific (not "bug fixes and performance improvements")
 - [ ] App is not a thin WebView wrapper without native functionality
 - [ ] No multiple Bundle IDs for near-identical apps
+- [ ] **IP clearance**: app binary + screenshots + previews + description + icon: you own or license all content (audio, video, images, fonts, data feeds, third-party logos); no false **Apple endorsement** (**§5.2.4**)
+- [ ] **Apple marks / Apple Pay / Wallet / “Compatible with”**: comply with [App Store marketing guidelines](https://developer.apple.com/app-store/marketing/guidelines/), [Apple trademark guidelines](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html), and product-specific guides (Apple Pay, Wallet) where applicable
+- [ ] **Website / Safari Push** (if used): sent under **your** brand with **your** identifying artwork; no impersonation; third-party marks only with rights; written notice to Apple for any push screenshots/marketing exclusions
 - [ ] All features accessible via normal navigation (no hidden features)
 - [ ] New features documented in Notes for Review with navigation path
 - [ ] App Clip (if present) contains no advertising
@@ -94,6 +100,15 @@ Copy and use these checklists before every submission.
 - [ ] No license-key or license screen at launch; updates only via Mac App Store
 - [ ] No Sparkle or other external updater bundled in the MAS build
 - [ ] No auto-login items / background daemons without explicit user consent
+
+### Gate K — Safety, gambling, speech & system access
+
+- [ ] **§1.1**: No prohibited violence/weapons facilitation; game enemies are not solely real-world targeted groups; age rating matches graphic content
+- [ ] **§5.3**: If real-money gambling: licensed + geo-gated + free app + no IAP for gambling credits; sweepstakes rules say Apple is not a sponsor
+- [ ] **Loot boxes / gacha**: Odds disclosed before purchase (**§3.1.1**)
+- [ ] **Speech / forums / satire**: Understand Apple is not a “free speech” forum; satire apps align with **§1.1.1** professional exemption; UGC still has **§1.2** moderation
+- [ ] **Sandbox**: iOS app respects container / documented APIs; Mac App Store build is sandboxed (**§2.4.5**); no `prefs:root` / private Settings URLs
+- [ ] **VPN / MDM / Network Extension**: Meets **§5.4 / §5.5** (org account, disclosures, NEVPNManager for VPN); entitlements match declared behavior
 
 ### Gate G — AI & UGC
 
@@ -122,6 +137,20 @@ Copy and use these checklists before every submission.
 - [ ] Screenshots/video attachment prepared for non-obvious or hardware-specific flows
 - [ ] If rejection is metadata-only, plan same-build resubmission path
 - [ ] If appealing, draft one evidence-based appeal (one per rejected submission)
+
+### Gate J — ADPLA / program requirements (contract)
+
+- [ ] **Hardware disclosure**: If the app pairs with or controls a **physical device** (including MFi), App Store Connect notes / submission fields document **connection type** and **at least one** supported device (per ADPLA §6.1)
+- [ ] **No hidden functionality**: Everything reviewers need is reachable from normal UI or clearly documented in Notes for Review
+- [ ] **TestFlight**: External testers only after Apple-approved build; no paid beta; no using TestFlight to dodge App Store or harvest ratings (§7.4)
+- [ ] **Service providers**: Nobody outside your team submits the app or runs TestFlight **on your behalf** (§2.9)
+- [ ] **Certificates**: Distribution/signing keys not shared via public cloud for third-party signing; compromise → notify Apple (`product-security@apple.com`)
+- [ ] **Recording / Sensitive Content Analysis**: Obvious **recording** indicator when capturing mic/camera/screen; **no** uploading off-device flags that Sensitive Content Analysis found nudity (§3.3.3)
+- [ ] **Real-time nav / WeatherKit**: EULA includes required **disclaimer** strings if the app qualifies (ADPLA §3.3.3(F), WeatherKit Attachment 8)
+- [ ] **US one-time digital IAP**: Pre-purchase **license** disclosure + link to **Apple Media Services** terms where required (Attachment 2 §3.2)
+- [ ] **Japan storefront**: If using **Alternative Payment Processing** / **Out-of-App Offers**, entitlement + **StoreKit** flows + **default browser** (not web view) for outbound purchases — see ADDENDUM.md Japan section
+- [ ] **macOS notarization**: Marketing does **not** claim Apple “approved” or “verified security” of the app (§5.3)
+- [ ] **ADPLA §3.1(d)**: To best of your knowledge, metadata and app do not infringe Apple or third-party IP (including music, video, photography, logos, data rights)
 
 ---
 
@@ -181,6 +210,7 @@ BACKEND STATUS:
 
 HARDWARE/SPECIAL REQUIREMENTS:
   [None / or describe: "Requires Bluetooth LE hardware; video attached"]
+  If hardware/MFi: per ADPLA §6.1, App Store Connect should already list connection method + at least one supported device; repeat here for reviewers.
 
 ATTACHMENT:
   [Link to demo video if applicable, or "No attachment"]

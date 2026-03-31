@@ -1,30 +1,95 @@
 ---
 name: appstore-deployment
-description: App Store deployment compliance agent for iOS/macOS apps. Audits submissions for rejection risk, guides pre-submission preparation, and produces App Review notes, demo account packages, and appeal templates. Use when submitting to the App Store, debugging a rejection, preparing review notes, checking IAP/subscription compliance, auditing privacy manifests, reviewing permissions, evaluating AI features, or handling external purchase links.
+description: App Store deployment compliance agent for iOS/macOS apps. Audits submissions for rejection risk, guides pre-submission preparation, and produces App Review notes, demo account packages, and appeal templates. Use when submitting to the App Store, debugging a rejection, preparing review notes, checking IAP/subscription compliance, auditing privacy manifests, reviewing permissions, location and advertising/ATT rules, Apple or third-party trademarks and marketing assets, encryption export compliance, safety or objectionable content (violence, weapons, gambling), speech/UGC policy, sandboxing and system-level access, evaluating AI features, handling external purchase links, or aligning with Apple Developer Program License Agreement (ADPLA) program requirements.
 ---
 
 # App Store Deployment Agent Skill
 
 Reduces App Store rejection risk by applying Apple's current review criteria (guidelines last updated **February 6, 2026**) to your submission before it reaches reviewers.
 
-> **Authority hierarchy**: Apple's App Review Guidelines → Apple Support/Developer Docs → Apple WWDC transcripts → Community evidence (Reddit/StackOverflow/blogs).  
-> When sources conflict, defer to the most recent Apple document.
+> **Authority hierarchy**: Apple's **App Review Guidelines** → **Program Requirements** (including Human Interface Guidelines and API docs incorporated into the [Apple Developer Program License Agreement](https://developer.apple.com/support/terms/apple-developer-program-license-agreement/) — “ADPLA”) → Apple Support/Developer Docs → Apple WWDC transcripts → Community evidence (Reddit/StackOverflow/blogs).  
+> When sources conflict, defer to the most recent Apple document. **Guidelines and ADPLA overlap but are not identical**: review can cite either; binary behavior must satisfy documented APIs, privacy rules, and contractual program requirements, not only guideline prose.
 
 ## Quick Approach
 
 When invoked, run these gates in order — stop at the first blocker and fix it before continuing:
 
-1. **Gate A – Hard submission blockers** (ITMS errors, missing manifests, broken URLs)
+1. **Gate A – Hard submission blockers** (ITMS errors, missing manifests, broken URLs, **encryption/export**)
 2. **Gate B – App completeness** (crashes, placeholders, missing demo access, broken IAPs)
-3. **Gate C – Privacy & permissions** (policy, purpose strings, ATT, account deletion)
+3. **Gate C – Privacy & permissions** (policy, purpose strings, **location & ads**, ATT, account deletion)
 4. **Gate D – Payments & monetization** (IAP rules, storefront scope, subscription UI)
-5. **Gate E – Design & metadata** (4.2 minimum functionality, hidden features, spam)
+5. **Gate E – Design & metadata** (4.2 minimum functionality, hidden features, spam, **IP & marks**)
 6. **Gate F – Code execution & supply chain** (private APIs, hot updates, SDK manifests)
 7. **Gate G – AI, UGC, and age gates** (disclosure, moderation, declared/verified age limits)
-8. **Gate H – Trust & anti-scam checks** (dark patterns, misleading pricing, manipulative flows)
-9. **Gate I – Review operations & evidence** (reviewer-only bug logging, Resolution Center packets)
+8. **Gate K – Safety, speech, gambling, sandbox & system access** (§1.1 violence/weapons, §5.3, containers vs privileged APIs)
+9. **Gate H – Trust & anti-scam checks** (dark patterns, misleading pricing, manipulative flows)
+10. **Gate I – Review operations & evidence** (reviewer-only bug logging, Resolution Center packets)
+11. **Gate J – ADPLA & program requirements** (submission duties, TestFlight contract rules, restricted APIs/data uses called out in the license)
 
 Then produce: **Submission readiness verdict → Reviewer path script → App Review Notes draft → escalation options**.
+
+---
+
+## Gate J — ADPLA & program requirements (contract + §3.3)
+
+Use this gate when auditing **contractual** obligations and **Program Requirements** embedded in the ADPLA. These often align with App Review but can bite in legal, enterprise, or niche API cases.
+
+**Submission & honesty (Agreement §6.1, §3.2(f))**
+- Do **not** hide, misrepresent, or obscure features from review; you must cooperate with reasonable information requests.
+- If the app **connects to a physical device** (including MFi accessories), **inform Apple in App Store Connect**: disclose the means of connection (e.g. BLE, Lightning, headphone jack, other protocol) and identify **at least one** physical device the app is designed to work with. Apple may request access or samples **at your expense** (samples may not be returned).
+- Any post-submission change to functionality (including IAP-delivered functionality) generally requires **resubmission** for App Store / Custom App Distribution.
+
+**Service providers (§2.9)**
+- A third-party **may not** submit your app to the App Store or operate **TestFlight** on your behalf. (They may still host servers, etc., under a written agreement at least as protective of Apple as the ADPLA.)
+
+**Certificates & signing (§5)**
+- Safeguard distribution and submission certificates and keys; **do not** put App Store distribution certificates in shared cloud repos for third-party use. Notify Apple promptly if you believe keys are compromised (`product-security@apple.com`).
+
+**Multi-platform visibility (§6.3, §6.4)**
+- iOS/iPadOS apps submitted to the App Store may also be offered on **macOS** and **visionOS** via the App Store unless you **opt out** in App Store Connect — confirm rights, compatibility, and testing, or opt out.
+- **CarPlay**: iOS app widgets may surface on CarPlay; use **`disfavorLocations`** when a widget is unsuitable for driving (e.g. heavy interaction, requires unlock).
+
+**TestFlight — external testers (§6.5, §7.4)**
+- **External** TestFlight distribution requires an **Apple-reviewed** build first. Updates with **significant changes** need re-review per App Store Connect process.
+- **No fees** to participate in TestFlight; digital purchases in TestFlight builds must be **free** and for beta only.
+- Prohibited: using TestFlight to **circumvent** the App Store, run perpetual demos, or **solicit App Store ratings**.
+- **Kids-focused apps**: verify external beta testers meet **age of majority** in their jurisdiction.
+
+**Operations & analytics (§6.7–6.8)**
+- Data from Apple’s **developer analytics** is for **improving your apps** only — no handoff to third parties except a **Service Provider** under strict use limits; no cross-developer aggregation.
+- Apps in the store must stay **compatible with the currently shipping OS**; Apple may remove apps that fall behind.
+
+**Privacy & data — program text beyond typical guideline bullets**
+- **Recordings** (camera, mic, screen, etc.): show a **clear, conspicuous** in-app indicator while recording; do not design for **secret** recording of others.
+- **Sensitive Content Analysis**: do **not** send **off device** any signal about whether content was flagged as containing nudity.
+- **Face Data**: use only for a **direct app purpose**; no advertising, authentication, or marketing; no selling to brokers; transfer off-device only with **clear consent** and for the stated function.
+- **Health / HIPAA**: the ADPLA restricts using Apple Software/Services (including iCloud / CloudKit in scope of the terms) to create, store, or transmit **PHI** in ways that would make Apple your **business associate** — treat regulated health stacks as **legal + architecture** review, not checklist-only.
+- **Declared Age Range / Significant App Update APIs**: use only for **age-appropriate features** or **legal** requirements; no selling that data to data brokers.
+- **IDFA / AdSupport**: use only for **serving advertising**; honor **Tracking Preference**; after user resets the advertising identifier, do **not** link old and new IDs or derived data.
+
+**In-App Purchase — Attachment 2 hooks**
+- **Keyboard extensions** must **not** offer IAP **inside** the keyboard UI (IAP OK elsewhere in the host app).
+- **US App Store storefront**: for **one-time** digital content IAP, before purchase you must clearly state the user is buying a **license**, with a link to full terms including **Apple Media Services Terms and Conditions** (and your EULA if applicable) — see Attachment 2 §3.2.
+
+**Maps & Weather — required notice text (§3.3.3(F), WeatherKit Attachment 8)**
+- **Real-time route / navigation** apps: EULA must include Apple’s required **“YOUR USE OF THIS REAL TIME ROUTE GUIDANCE APPLICATION IS AT YOUR SOLE RISK. LOCATION DATA MAY NOT BE ACCURATE.”** (exact wording per current ADPLA / docs).
+- **Real-time weather guidance** via WeatherKit: EULA must include the **WeatherKit** disclaimer block required in Attachment 8 (accuracy / sole risk).
+
+**Foundation Models (§3.3.8(I))**
+- On-device / Apple Intelligence **Foundation Models** use is subject to Apple’s **[Foundation Models Framework Acceptable Use Requirements](https://developer.apple.com/apple-intelligence/acceptable-use-requirements-for-the-foundation-models-framework)**; keep **Adapters** compatible with the shipping model or risk OS incompatibility (§6.8).
+
+**Regional addenda (verify current Apple Materials)**
+- **Japan** — Alternative App Marketplaces, **Alternative Payment Processing**, and **Out-of-App Offers** have detailed design, entitlement, browser, prominence, age-gating, and reporting rules (**Attachment 12**). See [ADDENDUM.md — Japan ADPLA commerce](ADDENDUM.md#japan-app-store-adpla-attachment-12-commerce--distribution).
+- **China mainland storefront** — **Attachment 13** amends **paid** commission rates (e.g. **25%** standard / **12%** small business and qualifying cases effective **March 15, 2026** per ADPLA text); confirm current Paid Applications Agreement for accounting.
+
+**Notarization (macOS §5.3)**
+- You may **not** tell users that Apple “approved” or “secured” your app because it was notarized; notarization is **not** a malware or safety guarantee from Apple’s perspective.
+
+**EU — DSA & P2B (Schedule 1 Exhibit D)**
+- Developers established in the EU can use Apple’s **DSA redress** information for account/app removal disputes: [apple.com/legal/dsa/redress-options](https://www.apple.com/legal/dsa/redress-options). **P2B** (platform-to-business) complaints for eligible regions: [developer.apple.com/contact/p2b](https://developer.apple.com/contact/p2b/).
+
+**Illegal content & platform safety (§3.2(b))**  
+- The ADPLA prohibits using Apple tools or services for unlawful activity or content — including material that **facilitates child sexual exploitation or abuse**. Such content is also a **hard rejection** under **Safety** guidelines (**§1.1**). Treat as **legal + safety + immediate removal** if ever implicated.
 
 ---
 
@@ -87,10 +152,12 @@ These prevent even entering review. Fix before submitting.
 - Apple calls these out explicitly as common "unresolved issues."
 - Fix: Run a URL health check script before every submission.
 
-**Export Compliance**
-- If the app uses encryption (even HTTPS), set `ITSAppUsesNonExemptEncryption` in Info.plist appropriately.
-- Without this, Apple will prompt during upload and block distribution until answered.
-- Reference: [developer.apple.com/documentation/security/complying_with_encryption_export_regulations](https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations)
+**Export compliance & encryption (upload + ADPLA)**
+- If the app uses **encryption** (TLS, crypto libraries, proprietary crypto, etc.), set **`ITSAppUsesNonExemptEncryption`** in `Info.plist` accurately and complete the **encryption / export** questionnaire in App Store Connect. Without this, upload or distribution can stall until answered.
+- **Scope is broad**: many apps answer “yes” because they use HTTPS or standard OS crypto; follow Apple’s wizard and docs for **exemptions** (e.g. only exempt categories).
+- **Stronger cases**: custom crypto, VPN, secure messaging, or regulated markets may require **export classification** work (e.g. **EAR** / **BIS** self-classification or **CCATS** where applicable) and accurate **Schedule 1**–style certifications when you deliver binaries to Apple. Treat this as **legal + security**, not only a plist checkbox.
+- **macOS notarization upload (§5.3)**: ADPLA prohibits uploading apps subject to certain **export-controlled** categories without authorization; align notarization payloads with your export story.
+- Reference: [Complying with encryption export regulations](https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations) · [App Store Connect — export compliance](https://developer.apple.com/help/app-store-connect/reference/app-information/export-compliance-documentation-for-encryption)
 
 **Distribution scope & compliance (outside guideline text but blocks release)**
 - **App Store** — Full [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/). Prep: [App Review](https://developer.apple.com/app-store/review/).
@@ -145,13 +212,26 @@ Rejection message pattern: *"Your app requests access to [resource] but does not
 - Allow guest/browse mode for features that don't need an account
 - Rejection pattern: *"Your app requires users to log in before they can access features that are not account-based."*
 
-**ATT (App Tracking Transparency):**
-- Use `AppTrackingTransparency` framework for any cross-app/cross-site tracking
-- Cannot gate features on user granting tracking permission
-- Reference: [developer.apple.com/documentation/apptrackingtransparency](https://developer.apple.com/documentation/apptrackingtransparency)
-
 **Third-party AI disclosure — explicit Apple requirement (§5.1.2(i)):**  
 > *"You must clearly disclose where personal data will be shared with third parties, including with third-party AI, and obtain explicit permission before doing so."*
+
+**Location services (§5.1.5 + ADPLA §3.3.3(F))**  
+- Use **Core Location / MapKit / location-based** features only when **directly relevant** to what the app does.  
+- **Do not** market or design for **autonomous vehicle control**, **emergency / life-saving** reliance, or other disallowed positioning (see guideline text and ADPLA for navigation/weather disclaimer requirements in **Gate J**).  
+- **Notify and obtain consent** before collecting, transmitting, or using location; **purpose strings** and in-app explanations must match real use (**§5.1**).  
+- **Do not** disable, spoof, or wrap Apple’s **system consent UI** for location (or contacts, photos, calendar, etc.) — accurate copy in permission dialogs only (**ADPLA §3.3.3(F)(iv)**).  
+- **“Always” location**: provide a clear **user benefit** when requesting continuous access.  
+- **Custom map overlays**: you are responsible for alignment and correctness when combining your data with **Apple Maps**.  
+- Reference: [§5.1 Legal — Location Services](https://developer.apple.com/app-store/review/guidelines/#legal) · [HIG — accessing private data](https://developer.apple.com/design/human-interface-guidelines/patterns/accessing-private-data/)
+
+**Advertising, tracking & identifiers**  
+- **ATT** (`AppTrackingTransparency`): required for **cross-app / cross-site tracking** per Apple’s rules; cannot **gate core features** on tracking consent.  
+- **IDFA / AdSupport (ADPLA §3.3.3(E))**: use **only** to **serve advertising**; check **Tracking Preference** before using IDFA for ads; after user **resets** the advertising identifier, do **not** link old and new IDs or derived data.  
+- **Ad Network APIs** (if granted): use **only** for **ad validation / conversion** per Apple’s terms — no combining validation payloads with other user profiles.  
+- **Kids Category**: **no** third-party analytics or third-party advertising in apps **primarily for kids** (**§1.3**); stricter rules for minors’ data.  
+- **APNs / local notifications (Attachment 1)**: no **spam** or **phishing**; **promotional** push only with **explicit in-app opt-in** language and in-app **opt-out**, except Pass-related promotions tied to the Pass. Do not use notifications to **evade** privacy or tracking rules.  
+- **Network Extension / “Access Wi‑Fi Info” (ADPLA §3.3.3(G))**: entitlements are for **networking functionality**, **not** ads, profiling, or bypassing user privacy settings (e.g. inferring location when location is off).  
+- Reference: [§5.1 Privacy](https://developer.apple.com/app-store/review/guidelines/#privacy) · [ATT](https://developer.apple.com/documentation/apptrackingtransparency)
 
 **Reference:** [developer.apple.com/app-store/review/guidelines/#privacy](https://developer.apple.com/app-store/review/guidelines/#privacy)
 
@@ -167,9 +247,12 @@ Rejection message pattern: *"Your app requests access to [resource] but does not
 |-----------|----------------------|-------------------|
 | United States | Yes | No (as of current guidelines) |
 | EU (iOS/iPadOS) | With StoreKit External Purchase Link Entitlement | Yes |
+| Japan (Japan App Store storefront) | **Alternative Payment Processing** and/or **Out-of-App Offers** only with Apple-granted entitlement + **StoreKit** eligibility/disclosure flows; see ADPLA **Attachment 12** and Apple Materials | Yes |
 | Netherlands dating apps | With specific entitlement | Yes |
 | South Korea | With StoreKit External Purchase Entitlement | Yes |
 | All others | No | N/A |
+
+**Japan (Attachment 12) — design rules that differ from “US-style” external links:** IAP must be offered **at least as prominently** as any alternative payment option on the same screen; **Out-of-App** purchases use an **actionable link** that opens the **default web browser** (not an in-app `WKWebView`); no website-purchase promo on the **App Store product page**; **Kids** category and age rules block certain offers; entitlement/device OS requirements are defined in Apple Materials (ADPLA references **iOS 26.2+**, Japan devices). Full checklist: [ADDENDUM.md](ADDENDUM.md#japan-app-store-adpla-attachment-12-commerce--distribution).
 
 **Subscription paywall — minimum required disclosures:**
 - Subscription price and billing period must be **prominent and legible**
@@ -202,12 +285,28 @@ Fix: One app with in-app variations or in-app purchase.
 
 **Copycats (§4.1):** Closely mirroring another app's icon, name, or UI = rejection + potential expulsion.
 
+**Intellectual property, Apple marks & third-party brands (§5.2, ADPLA §3.1(d), §3.3.4)**  
+- You **certify** under the ADPLA that the app, **App Store metadata** (screenshots, description, previews, icons), **Xcode Cloud** content you provide, and **Wallet Pass** materials do **not** infringe **Apple’s or anyone else’s** rights — including **copyright, trademark, trade secret, patent, right of publicity, music / performance / sync licenses, video and stock-photo rights, fonts, and third-party data / API terms**.  
+- **App content**: only assets **you own** or **properly license** (including user-generated or partner content you display).  
+- **Third-party logos / names** in UI, notifications, passes, or marketing: use only with **permission** and in ways that **don’t imply endorsement** or confuse origin (**§5.2**, **§5.2.4**).  
+- **Apple marks & product imagery** (App Store logo, iPhone silhouettes, “Compatible with…,” **Apple Pay** marks, **Wallet** badges, screenshots of Apple UI): follow Apple’s **written** marketing and identity rules — not informal reuse. Primary entry points:  
+  - [Marketing Resources and Identity Guidelines](https://developer.apple.com/app-store/marketing/guidelines/)  
+  - [Guidelines for Using Apple Trademarks and Copyrights](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html) (also cited in ADPLA **§2.6** for referencing Apple products)  
+  - [Apple Pay Marketing Guidelines](https://developer.apple.com/apple-pay/marketing/) · [Add to Apple Wallet Guidelines](https://developer.apple.com/wallet/add-to-apple-wallet-guidelines/)  
+- **§5.2.1–5.2.3**: no **protected third-party material** without permission; no **misleading or copycat** representations; honor **third-party service terms** if you access or monetize their content; do not facilitate **illegal file sharing** or unauthorized **download/save** of media from third-party sources (e.g. streaming services) unless expressly permitted.  
+- **§5.2.4 Apple endorsements**: do **not** suggest or imply Apple **supplies**, **endorses**, or **guarantees** your app’s quality. **“Editor’s Choice”** (and similar) badges are **applied only by Apple**.  
+- **§5.2.5 Apple products**: do not make an app **confusingly similar** to Apple’s **products, interfaces, App Store / iTunes / Messages**, or **Apple ads** — includes look-and-feel that mimics system or store UI.  
+- **Disputes**: third-party IP claims against your app are handled via Apple’s [IP dispute process](https://www.apple.com/legal/intellectual-property/dispute-forms/index.html) when applicable.  
+- **Safari / Website Push IDs (ADPLA Attachment 1 §3)**: notifications must be sent under **your** site’s **name and brand**; include **your** icon / logo / identifying mark; **do not impersonate** another site or mislead about the sender. If you reference a **third-party** trademark in a push, you **warrant** you have the **rights**. Enabling Website Push permits Apple to use **screenshots** of those notifications and **your** associated marks in **Apple marketing**, except portions you **identify in writing** as not cleared for promotion.  
+- **In-app Apple services** (e.g. **MusicKit**, **ShazamKit**): follow **Apple Music Identity Guidelines** and program docs — artwork and metadata often **cannot** be split from permitted playback/UI patterns.  
+- Reference: [§5.2 Intellectual Property](https://developer.apple.com/app-store/review/guidelines/#legal) (scroll **Legal** section)
+
 **App Clips / Widgets / Extensions (often overlooked):**
 - App Clips cannot include advertising.
 - Widgets, extensions, and notifications must be directly related to app content/functionality.
 - Siri intents must match what the app actually does; avoid registering irrelevant intents.
 
-**Reference:** [developer.apple.com/app-store/review/guidelines/#minimum-functionality](https://developer.apple.com/app-store/review/guidelines/#minimum-functionality)
+**Reference:** [developer.apple.com/app-store/review/guidelines/#minimum-functionality](https://developer.apple.com/app-store/review/guidelines/#minimum-functionality) · [Legal (IP, location)](https://developer.apple.com/app-store/review/guidelines/#legal)
 
 ---
 
@@ -250,6 +349,43 @@ Fix: One app with in-app variations or in-app purchase.
 **Creator apps / age-gated content:** If the app allows creation or discovery of content that can exceed the app's age rating, require a way to flag that content and restrict access using verified or declared age. Keep **App Store Connect age rating** answers current with the [2026 age rating system](https://developer.apple.com/news/upcoming-requirements/?id=07242025a) and [definitions](https://developer.apple.com/help/app-store-connect/reference/age-ratings-values-and-definitions/).
 
 **Multi-platform targets (tvOS, watchOS, visionOS):** Privacy manifests and required-reason API rules apply per Apple docs across these platforms; validate each target's `Info.plist`, extensions, widgets, and embedded binaries separately.
+
+---
+
+## Gate K — Safety, speech, gambling, sandbox & system access
+
+**Apple anchors:** [Safety (§1.x)](https://developer.apple.com/app-store/review/guidelines/#safety) · [Legal — §5.3 Gaming / gambling](https://developer.apple.com/app-store/review/guidelines/#legal) · [Software requirements / sandbox expectations](https://developer.apple.com/app-store/review/guidelines/#software-requirements)  
+**Deeper dives:** [REFERENCE.md — Gaming & gambling](REFERENCE.md#gaming-gambling-and-lotteries-53) · [EDGE-CASES — Content policy](EDGE-CASES.md#content-policy-edge-cases)
+
+### Violence, weapons & objectionable content (§1.1)
+
+- Apple rejects **offensive, gratuitous, or harmful** content — including realistic **killing, torture, or abuse** of people or animals when presented to **shock** or **glorify** harm (see full **§1.1** text for examples and nuance).
+- **§1.1.3 — Weapons:** Apps must not **encourage illegal or reckless** use of weapons/dangerous objects or **facilitate purchase** of **firearms/ammunition** where the guideline prohibits it. Hunting/sport contexts still need **appropriate age rating** and compliance with local law.
+- **Games:** Fictional “enemies” must not **solely target** a **real** race, culture, government, corporation, or other real-world group (**§1.1.2**).
+- **Terrorism / serious harm:** Content that **threatens, incites, or promotes violence** or **CSAM** is prohibited under guidelines and **ADPLA §3.2(b)** — immediate legal/safety escalation, not a routine review tweak.
+
+### “Open speech,” politics, satire & forums
+
+- The App Store is a **private platform**: Apple enforces **§1.1** (e.g. hate, harassment, defamation) and local-law-sensitive material. **First Amendment / “free speech”** doctrines **do not** bind Apple’s acceptance of your app.
+- **§1.1.1** explicitly notes that **professional political satirists and humorists** are **generally exempt** from a narrow part of the objectionable-content rule — **satire used as cover for harassment** or **defamation** still fails review.
+- **UGC / social / debate apps:** You still need **§1.2** tooling (filter, report, block, contact, timely response) and **age-appropriate** controls; “open discussion” is not a bypass for **illegal** content or **missing moderation**.
+
+### Gambling, contests & loot boxes (§5.3 + §3.1.1)
+
+- **Real-money gaming** (sportsbook, casino, poker, etc.): **licensing** in every jurisdiction you ship; **geo-restrict** to licensed regions; app must be **free to download**; **no IAP** to purchase **gambling credits** (**§5.3**). Expect **extra review** time.
+- **Sweepstakes / contests:** Must be **run by you**; **official rules** in-app must state **Apple is not a sponsor** (**§5.3.1–5.3.2**).
+- **Loot boxes / randomized digital items:** Disclose **odds** of item types **before purchase** (**§3.1.1**).
+- **Gray areas** (skill contests, fantasy, prediction markets): **legal review** per territory — see [EDGE-CASES — Gambling gray zone](EDGE-CASES.md#gambling-gray-zone).
+
+### Sandboxing, containers & “system access”
+
+- **iOS / iPadOS / tvOS / watchOS / visionOS:** Apps must stay within Apple’s **documented** model: your **sandbox / designated container**, **extensions** only in **documented** surfaces, **no private APIs** to poke other apps’ data or system internals (**§2.5.1**, **ADPLA §3.3.1**). Use **public** APIs for sharing (share sheet, `UIDocumentPicker`, App Groups where appropriate, etc.).
+- **Mac App Store:** **Sandbox required** per **§2.4.5** — no third-party installers, no escaping the store for updates, no **root/setuid** — see [REFERENCE.md — Mac App Store](REFERENCE.md#mac-app-store-additional-rules-245).
+- **Privileged capabilities** (examples): **VPN** (**§5.4** — org account, `NEVPNManager`, strict no-resale-of-user-data), **MDM** (**§5.5** — enterprise/gov/edu patterns, Apple approval), **Network Extension** (declared networking purpose only; see **Gate C**). Misusing these for **surveillance**, **ads**, or **undeclared** data collection → rejection and program risk.
+- **Settings / system UI:** Do not deep-link into arbitrary **Settings** panes with **private URL schemes** (`prefs:root`, etc.); open **your app’s** settings via **`openSettingsURLString`** (**Gate F**).
+- **macOS “power user” APIs** (Accessibility, Automation, screen capture, input monitoring): Use **only** for **stated, legitimate** features; reviewers may flag **Automation** or **Accessibility** used to **control other apps** for non–a11y purposes. Document the **user-visible** purpose in **Notes for Review** and match **entitlements** to reality.
+
+**Reference:** [App Review Guidelines — Safety](https://developer.apple.com/app-store/review/guidelines/#safety)
 
 ---
 
@@ -314,6 +450,8 @@ In-app purchases: [List product IDs submitted with this binary]
 
 Non-obvious behaviors: [Anything that might look like a bug but is intentional]
 
+Hardware (if any): [Connection type + device name; confirm App Store Connect §6.1 disclosure matches]
+
 Attachment: [demo video URL or note if hardware is required]
 ```
 
@@ -348,9 +486,9 @@ Rejected → Read guideline clause cited exactly
 
 ## Reference Files
 
-- **[REFERENCE.md](REFERENCE.md)** — Full rejection database with community case studies, Apple doc anchors, Reddit/StackOverflow patterns, fix code examples
+- **[REFERENCE.md](REFERENCE.md)** — Full rejection database with community case studies, Apple doc anchors, Reddit/StackOverflow patterns, fix code examples; **§5.2 / §5.1.5 / ads–push / export** pattern tables; **§5.3 gambling**, **§1.1 safety/speech**, **sandbox & system access** tables
 - **[EDGE-CASES.md](EDGE-CASES.md)** — AI policy, hot updates, privacy manifests, external payments, UGC edge cases, regulated domains
 - **[CHECKLIST.md](CHECKLIST.md)** — Printable pre-submission checklist and reviewer kit templates
-- **[ADDENDUM.md](ADDENDUM.md)** — Vibe coding crackdown (March 2026), age rating overhaul, visionOS requirements, app size limits, ITMS error codes, ATS exceptions, launch screen, code signing, TestFlight vs App Store review, inactive app removal, screenshot requirements, local network permission, notification timing, post-approval quality (§5.6.4)
+- **[ADDENDUM.md](ADDENDUM.md)** — Vibe coding crackdown (March 2026), age rating overhaul, visionOS requirements, app size limits, ITMS error codes, ATS exceptions, launch screen, code signing, TestFlight vs App Store review, inactive app removal, screenshot requirements, local network permission, notification timing, post-approval quality (§5.6.4), **Japan ADPLA Attachment 12** (alternative payments / out-of-app / marketplace)
 
 **Maintenance:** Rejection statistics (e.g. 2024 transparency counts) should be refreshed when Apple publishes new annual reports; gate logic and guideline links stay authoritative until Apple updates the guidelines page.

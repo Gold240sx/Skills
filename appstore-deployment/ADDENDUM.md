@@ -682,3 +682,40 @@ This means:
 - Respond to negative reviews via ASC (shows Apple you're engaged)
 - Fix reported issues promptly in updates
 - Don't incentivize positive reviews (§3.2.2(x) violation)
+
+---
+
+## Japan App Store — ADPLA Attachment 12 (commerce & distribution)
+
+**Source:** Apple Developer Program License Agreement, **Attachment 12** (Additional Terms for iOS Apps in Japan), as amended from time to time.
+
+This is **contractual** and **territory-specific**. Always verify **Apple Materials** in App Store Connect and the developer portal before shipping; the ADPLA defers details to those materials.
+
+### Who it affects
+
+- Apps distributed on the **Japan storefront** of the App Store that use **Alternative Payment Processing**, **Out-of-App Offers**, and/or participate in **Alternative App Marketplaces (Japan)**.
+- **Alternative App Marketplace (Japan)** is a separate track (marketplace app + **Marketplace Website (Japan)**, **MarketplaceKit**, install verification tokens, eligibility such as org enrollment, standing, volume, or letter-of-credit path per ADPLA).
+
+### Alternative Payment Processing & Out-of-App Offers (high-signal rules)
+
+- **Entitlement + StoreKit**: Before each payment or “enter payment info” flow, call the **documented StoreKit APIs** to confirm eligibility and, when required, show Apple’s **system disclosure sheet** (follow Apple Materials for timing/wording).
+- **Payment flow must complete inside the same app** for Alternative Payment Processing; **no hidden or undocumented** payment behavior.
+- **Out-of-App Offers**: Actionable link must open the **default web browser** app — **not** an in-app web view (`WKWebView`).
+- **Parity / prominence**: On any UI that merchandises a digital purchase, **Apple’s IAP** must be offered **alongside** any other payment option, **at least as prominently**, and per Apple Materials when shown together.
+- **No discouragement**: Do not use **disparaging** copy or visuals that **discourage** use of Apple’s IAP.
+- **Product page**: Do **not** put website purchase info or outbound purchase links on the **App Store product page** for the app.
+- **Reader external link entitlement**: Cannot use the **StoreKit External Link Account** (reader) entitlement **as** Alternative Payment Processing / Out-of-App Offers; they are distinct programs.
+- **Age / Kids**: **Kids** category apps cannot use Out-of-App Offers to minors; **under 13** — no Out-of-App Offers; **13–17** — parental gate may be required for certain options; **under 18** — restrictions on Alternative Payment Processing per ADPLA §3.1(B).
+- **TestFlight**: Allowed for beta-testing these flows only if **transactions are free** to testers.
+- **Device / OS**: Entitlements are tied to **Japan** devices and minimum iOS versions specified in Apple Materials (ADPLA text references **iOS 26.2** or later for certain capabilities — treat as “current Apple Materials” if version numbers shift).
+
+### Commissions & reporting (summary)
+
+Attachment 12 specifies **commission** rates for Alternative Payment Processing, Apple IAP (amended rates for Japan storefront), Out-of-App Offers (e.g. **7-day** attribution window after actionable link), and **Core Technology Commission** for marketplace / related web sales. It also requires **reporting**, **invoicing**, **payment** to Apple, **tax** handling, **audit** retention (e.g. **3 years**), and **PCI Level 1** certification attestation for external payment providers where applicable.
+
+**Engineering + finance + legal** should review together — this is not just App Review UI polish.
+
+### Related Apple pages
+
+- [Apple Developer Program License Agreement](https://developer.apple.com/support/terms/apple-developer-program-license-agreement/) (full text; search “Attachment 12”)
+- App Store Connect **Agreements, Tax, and Banking** and **entitlement** request flows for Japan-specific capabilities

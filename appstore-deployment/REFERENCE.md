@@ -800,6 +800,8 @@ Medical apps making clinical claims should be submitted by the legal entity prov
 
 ## Gaming, Gambling, and Lotteries (§5.3)
 
+**Apple anchor:** https://developer.apple.com/app-store/review/guidelines/#legal (scroll to **5.3**)
+
 - Real money gambling requires licensing in every jurisdiction where distributed
 - Apps must be geo-restricted to licensed jurisdictions
 - Free on App Store (gambling apps cannot charge download fee)
@@ -807,6 +809,49 @@ Medical apps making clinical claims should be submitted by the legal entity prov
 - Loot boxes: must disclose odds of each item type before purchase (§3.1.1)
 - Binary options trading apps: not permitted
 - Cryptocurrency futures/ICOs: only from licensed financial institutions
+
+### Rejection / review patterns (gambling & contests)
+
+| Pattern | Typical issue | Fix |
+|---------|----------------|-----|
+| Real-money play without license proof | Reviewer cannot verify legality in reviewer’s storefront | Geo-restrict; attach licenses in Notes for Review; expect longer review |
+| Paid app + gambling | **§5.3** — gambling apps must be **free** | Change pricing model |
+| IAP buys chips | IAP must not purchase **gambling credit** | Use compliant model per guideline |
+| Sweepstakes / raffle | Apple shown as sponsor | Rules must state **Apple is not a sponsor** (**§5.3.2**) |
+| Loot box odds hidden | **§3.1.1** | Show odds **before** purchase |
+
+**Skill cross-reference:** [SKILL.md](SKILL.md) **Gate K** · [EDGE-CASES — Gambling gray zone](EDGE-CASES.md#gambling-gray-zone)
+
+---
+
+## Safety, violence, weapons & speech (§1.1)
+
+**Apple anchor:** https://developer.apple.com/app-store/review/guidelines/#safety
+
+| Pattern | Guideline hook | Mitigation |
+|---------|----------------|------------|
+| Gratuitous gore / harm | **§1.1.2** realistic violence | Tone down; contextualize; match age rating; games avoid solely targeting real groups |
+| Weapons commerce / reckless use | **§1.1.3** | Remove purchase facilitation or illegal encouragement; legal review for region |
+| Hate / harassment disguised as “debate” | **§1.1.1** | Moderation, reporting, clear rules; satire must be genuine professional satire per guideline |
+| “Free speech” appeal | N/A — platform rules | Apple applies **§1.1** / **§1.2**; not a public-forum legal defense in review |
+| Terrorism / CSAM / serious harm | **§1.1** + law | Do not ship; legal + safety response |
+
+**Skill cross-reference:** [SKILL.md](SKILL.md) **Gate K** · [EDGE-CASES — Political and satirical content](EDGE-CASES.md#political-and-satirical-content-111)
+
+---
+
+## Sandboxing & privileged system access (iOS + macOS)
+
+| Surface | Rule of thumb | Apple pointer |
+|---------|----------------|---------------|
+| iOS data isolation | Stay in **sandbox** / **documented** sharing APIs; no peeking into other apps’ containers | **§2.5.1**, **ADPLA** Program Requirements |
+| Mac App Store | **Sandbox**; single bundle; updates via MAS only | **§2.4.5** — [REFERENCE — Mac App Store](#mac-app-store-additional-rules-245) |
+| VPN | **Organization** developer; `NEVPNManager`; no selling user data | **§5.4** |
+| MDM | Commercial / edu / gov; Apple-granted capability; disclosures | **§5.5** |
+| Private Settings URLs | `prefs:root` / `App-Prefs` → rejection risk | **§2.5.1** — use `openSettingsURLString` |
+| macOS Automation / Accessibility | Use for **real** feature; avoid “remote control” of other apps for non-a11y automation | Document in Notes for Review; match entitlements |
+
+**Skill cross-reference:** [SKILL.md](SKILL.md) **Gate K**, **Gate F**
 
 ---
 
@@ -820,7 +865,80 @@ Medical apps making clinical claims should be submitted by the legal entity prov
 
 ---
 
+## §5.2 IP, Apple marks, §5.1.5 location, ads & push (rejection patterns)
+
+**Apple anchors:**  
+- Legal hub: https://developer.apple.com/app-store/review/guidelines/#legal  
+- Privacy hub: https://developer.apple.com/app-store/review/guidelines/#privacy  
+
+**Skill cross-reference:** [SKILL.md](SKILL.md) — **Gate C** (location, ATT, ads, push), **Gate E** (IP & marks), **Gate K** (safety, gambling, sandbox), **Gate J** (ADPLA), **Gate A** (encryption/export).
+
+### §5.2 Intellectual Property
+
+**Guideline gist:** *"Make sure your app only includes content that you created or that you have a license to use. Your app may be removed if you've stepped over the line and used content without permission."*
+
+| Sub-cause | Reviewer / risk pattern | Fix |
+|-----------|-------------------------|-----|
+| Unlicensed assets | Metadata or binary contains **trademark**, **character**, **music**, or **stock** content you cannot document rights for | Replace with owned/licensed assets; keep license trail for review disputes |
+| Misleading affiliation | App name, icon, or screenshots suggest **official** tie to brand X | Rename/redesign; remove third-party logos from screenshots unless permitted |
+| Third-party scraping / rip | **§5.2.3** — saving, converting, or downloading media from services (e.g. music/video platforms) without permission | Remove download paths; integrate only via official APIs/SDK terms |
+| Terms violation | **§5.2.2** — app uses or monetizes a third-party API/content against their ToS | Re-read partner agreements; remove features or obtain written permission |
+| Copycat (related) | **§5.2.1** + **§4.1** — "copycat" or misleading representation of another *developer's* app | Differentiate icon/name/UI; see **Gate E** in [SKILL.md](SKILL.md) |
+
+**IP dispute (another party claims infringement):** Apple’s form — https://www.apple.com/legal/intellectual-property/dispute-forms/index.html  
+
+### §5.2.4 Apple endorsements & §5.2.5 Apple-like UI
+
+**§5.2.4 quote (abridged):** *"Don't suggest or imply that Apple is a source or supplier of the App, or that Apple endorses any particular representation regarding quality or functionality."* Editor’s Choice and similar badges are **applied by Apple only**.
+
+**§5.2.5 gist:** Do not create an app **confusingly similar** to Apple’s products, **App Store / iTunes / Messages**-like interfaces, or Apple **advertising** themes.
+
+| Sub-cause | Pattern | Fix |
+|-----------|---------|-----|
+| Fake “Featured by Apple” | Marketing, screenshots, or landing page show **unauthorized** Apple badges or rankings | Use only [Marketing Resources](https://developer.apple.com/app-store/marketing/guidelines/) assets where allowed; remove fake badges |
+| App Store clone UI | Onboarding mimics **App Store** purchase sheets or system **Settings** to trick users | Redesign; don’t mimic first-party store/system chrome |
+| Notarization overclaim (macOS) | Site says Apple **“approved”** or **“verified security”** because of notarization | Reword per ADPLA — notarization ≠ Apple endorsement of quality (**Gate J** in [SKILL.md](SKILL.md)) |
+
+**Apple trademark / marketing rules (contract + guidelines):** https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html  
+
+### §5.1.5 Location Services
+
+**Guideline gist:** *"Use Location Services in your app only when it is directly relevant to the features and services provided by the app."* Notify and obtain consent; explain purpose; location APIs should not be used for **emergency services** or **autonomous control** of vehicles/aircraft (with narrow exceptions in the guideline text).
+
+| Sub-cause | Pattern | Fix |
+|-----------|---------|-----|
+| Irrelevant location | App requests location for **ads/analytics** only while claiming “local features” | Narrow collection; disclose in privacy label and policy; align purpose strings |
+| Misleading purpose string | **§5.1** — string says X but app uses location for Y | Rewrite `NSLocation*` keys to match actual use |
+| Broken / custom consent UI | Custom pre-alert **blocks** or **spoofs** system permission (ADPLA §3.3.3(F)(iv)) | Remove; use system APIs only; accurate `purpose` copy |
+| “Always on” without justification | Background location with weak user benefit | Add clear in-app rationale; trim to “When In Use” if possible |
+
+**HIG:** https://developer.apple.com/design/human-interface-guidelines/patterns/accessing-private-data/  
+
+### ATT, IDFA, ads, APNs (program + guidelines)
+
+| Sub-cause | Pattern | Fix |
+|-----------|---------|-----|
+| Tracking without ATT | Ads/analytics fingerprint users cross-app without **App Tracking Transparency** when required | Integrate ATT; show prompt before accessing IDFA for tracking |
+| Feature-gated tracking | Core functionality requires “Allow Tracking” | Remove gate; degrade gracefully ([ATT docs](https://developer.apple.com/documentation/apptrackingtransparency)) |
+| IDFA misuse (contract) | Using IDFA for **non-ad** purposes, or **re-linking** after user resets advertising identifier (ADPLA §3.3.3(E)) | Restrict IDFA to advertising; honor reset |
+| Promotional push without opt-in | **APNs** used for upsell/marketing without documented user consent path (Attachment 1) | Add explicit opt-in copy + in-app opt-out; Pass-only promo exception for Pass-related use |
+| Wi‑Fi / VPN data for ads | **Network Extension** or Wi‑Fi info used to **profile** or infer location when user disabled location (ADPLA §3.3.3(G)) | Scope networking entitlements to stated VPN/filtering features only |
+
+**Kids (§1.3):** Apps **primarily for kids** must not include **third-party analytics** or **third-party advertising** — frequent rejection if SDKs slip in.
+
+### Website / Safari push notifications (ADPLA Attachment 1 §3)
+
+| Sub-cause | Pattern | Fix |
+|-----------|---------|-----|
+| Misleading sender | Push appears to come from **another** brand or site | Send only under **your** registered site brand; include **your** icon/logo |
+| Third-party mark in payload | Competitor or partner trademark without license | Obtain rights or remove mark |
+| Apple promo use of your creative | Apple may use **screenshots** of your Safari pushes and **your** marks in Apple marketing unless you **exclude in writing** the portions you cannot grant | Identify restricted assets to Apple if needed |
+
+---
+
 ## Export Compliance
+
+Blocks **upload** or **distribution** until resolved — often surfaced in App Store Connect, not always as a “guideline” paragraph in Resolution Center.
 
 **Info.plist keys to set:**
 ```xml
@@ -835,7 +953,15 @@ Medical apps making clinical claims should be submitted by the legal entity prov
 <string><!-- UUID from your ERN approval --></string>
 ```
 
-**Reference:** https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations
+**Operational patterns:**
+- Answer **encryption questions** in App Store Connect truthfully for **each** build; mismatches between binary capabilities and answers can **hold** processing.
+- Apps with **non-exempt** encryption may need U.S. **EAR** / **BIS** self-classification, **CCATS**, or other filings before you can ship — legal/compliance owns this, not only engineering.
+- **ADPLA** upload certifications (e.g. Schedule 1 delivery, **§5.3** notarization) assume you are not uploading **ITAR**/restricted payloads without authorization.
+- **macOS notarization**: export rules apply to what you upload to Apple’s notary service; keep plist + documentation aligned.
+
+**References:**  
+- https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations  
+- https://developer.apple.com/help/app-store-connect/reference/app-information/export-compliance-documentation-for-encryption  
 
 ---
 
@@ -939,6 +1065,12 @@ Apple may not cite a single "accessibility guideline," but **broken layouts**, *
 | WebView 4.2 rejection | uxcam | https://uxcam.com/blog/app-store-rejection-reasons/ |
 | Mandatory login for non-account features | Adapty | https://adapty.io/blog/app-store-rejection/ |
 | Missing Sign in with Apple | Quora | https://www.quora.com/My-first-app-has-just-been-rejected-on-Apple-App-Store-what-should-I-do |
+| §5.2 IP / trademark in metadata or binary | Reddit / SO | search `app store rejection` + `5.2` or `intellectual property` |
+| §5.3 gambling / real-money / IAP chips | Reddit / legal | search `app store rejection gambling` `5.3` |
+| §1.1 violence / weapons / objectionable | Reddit | search `1.1 rejection` `app store` |
+| Location purpose string / irrelevant tracking | Reddit r/iOSDev | search `location rejection` `NSLocationUsageDescription` |
+| ATT missing or tracking without consent | Apple forums / SO | search `AppTrackingTransparency rejection` |
+| Export compliance / encryption upload stuck | Apple Developer forums | search `ITSAppUsesNonExemptEncryption` `export compliance` |
 
 ---
 
@@ -963,6 +1095,7 @@ https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-rev
 | Source | URL | Authority |
 |--------|-----|-----------|
 | App Review Guidelines (Feb 2026) | https://developer.apple.com/app-store/review/guidelines/ | Primary |
+| Safety (§1.x hub) | https://developer.apple.com/app-store/review/guidelines/#safety | Primary |
 | App Review preparation | https://developer.apple.com/app-store/review/ | Primary |
 | App Review overview | https://developer.apple.com/distribute/app-review | Primary |
 | Required reason APIs | https://developer.apple.com/documentation/bundleresources/privacy_manifest_files/describing_use_of_required_reason_api | Primary |
@@ -977,6 +1110,11 @@ https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-rev
 | Age rating updates (2026) | https://developer.apple.com/news/upcoming-requirements/?id=07242025a | Primary |
 | Reader apps entitlement | https://developer.apple.com/support/reader-apps/ | Primary |
 | ATT documentation | https://developer.apple.com/documentation/apptrackingtransparency | Primary |
+| Legal — §5.2 IP & §5.1.5 Location (hub) | https://developer.apple.com/app-store/review/guidelines/#legal | Primary |
+| Apple trademarks & third-party use | https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html | Primary |
+| App Store marketing & identity | https://developer.apple.com/app-store/marketing/guidelines/ | Primary |
+| Export compliance (ASC reference) | https://developer.apple.com/help/app-store-connect/reference/app-information/export-compliance-documentation-for-encryption | Primary |
+| Encryption export regulations (dev doc) | https://developer.apple.com/documentation/security/complying_with_encryption_export_regulations | Primary |
 | StoreKit 2 | https://developer.apple.com/documentation/storekit | Primary |
 | RevenueCat ultimate guide | https://www.revenuecat.com/blog/growth/the-ultimate-guide-to-app-store-rejections/ | Community |
 | Adapty rejection guide | https://adapty.io/blog/app-store-rejection/ | Community |
